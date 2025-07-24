@@ -6,7 +6,7 @@
 /*   By: mubersan <mubersan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 19:51:07 by mubersan          #+#    #+#             */
-/*   Updated: 2025/07/22 20:35:37 by mubersan         ###   ########.fr       */
+/*   Updated: 2025/07/23 19:02:04 by mubersan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,11 +26,10 @@ static void	process_commands(t_data *data, char *prompt)
 		free_tokens(data->token);
 		return ;
 	}
+	data->fds = NULL;
 	allocate_heredoc(data->token, data->cmd);
 	fill_heredocs_from_tokens(data->token, data->cmd);
 	process_heredocs(data->cmd, data);
-	// if (handle_no_command(cmds, data, tokens, prompt)) ;
-		// return ;
 	execute_all_cmd(data->cmd, data, data->token);
 	free_tokens(data->token);
 	free_cmd(data->cmd);

@@ -6,7 +6,7 @@
 /*   By: mubersan <mubersan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 17:30:39 by mubersan          #+#    #+#             */
-/*   Updated: 2025/07/23 01:56:13 by mubersan         ###   ########.fr       */
+/*   Updated: 2025/07/24 16:40:17 by mubersan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,12 @@ static void close_pipe_fds(int *fds, int index, int count) {
 }
 
 void close_all_fds(int *fds, int count) {
-  int i;
 
   if (!fds || count <= 1)
     return;
-  i = 0;
-  while (i < (count - 1) * 2)
-    close(fds[i++]);
+  // i = 0;
+  // while (i < (count - 1) * 2)
+  //   close(fds[i++]);
   if (fds)
     free(fds);
 }
@@ -34,7 +33,7 @@ void close_all_fds(int *fds, int count) {
 void cleanup_and_exit(char **argv, t_data *data, int exit_code) {
   if (data->fds)
     close_all_fds(data->fds, data->cmd_count);
-  if (!argv || !*argv)
+  if (argv)
     free_tab(argv);
   free_cmd(data->cmd);
   free_tokens(data->token);

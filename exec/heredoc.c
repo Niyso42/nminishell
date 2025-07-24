@@ -6,7 +6,7 @@
 /*   By: mubersan <mubersan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 20:31:59 by mubersan          #+#    #+#             */
-/*   Updated: 2025/07/22 16:45:56 by mubersan         ###   ########.fr       */
+/*   Updated: 2025/07/24 16:46:17 by mubersan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,10 +32,14 @@ void allocate_heredoc(t_token *token, t_cmd *cmd)
 	while (current)
 	{
 		if (current->nb_heredoc > 0)
-			current->heredoc = malloc(sizeof(char *) * (current->nb_heredoc));
+			current->heredoc = malloc(sizeof(char *) * (current->nb_heredoc + 1));
+		if (current->heredoc)
+			current->heredoc[current->nb_heredoc] = NULL;
 		current = current->next;
 	}
 }
+
+// builtin dans un pipe fait des leaks 
 
 void process_heredocs(t_cmd *cmd, t_data *data)
 {
@@ -96,7 +100,7 @@ int process_heredoc_line(char *line, char *delimiter, int fd, int is_last)
     return (0);
 }
 
-static void	process_single_heredoc(t_cmd *cmd, int write_fd, int index)
+static void	process_single_heredoc(t_cmd *cmd, int write_fd, int index, t_data *data)
 {
 	char	*line;
 
@@ -104,6 +108,11 @@ static void	process_single_heredoc(t_cmd *cmd, int write_fd, int index)
 	{
 		ft_putstr_fd("> ", 1);
 		line = get_next_line(0);
+		if (g_exit_status == 1)
+		{
+			close(write_fd);
+			cleanup_and_exit(NULL, data, 130);
+		}
 		if (!line)
 		{
 			handle_heredoc_eof(cmd->heredoc[index]);
@@ -119,12 +128,11 @@ void heredoc_child_process(t_cmd *cmd, int write_fd, t_data *data)
 {
 	int	i;
 
-	disable_echoctl();
-	signal(SIGINT, handle_sigint_heredoc);
+	handle_sigint_heredoc();
 	i = 0;
 	while (i < cmd->nb_heredoc)
 	{
-		process_single_heredoc(cmd, write_fd, i);
+		process_single_heredoc(cmd, write_fd, i, data);
 		i++;
 	}
 	close(write_fd);
